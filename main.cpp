@@ -1,4 +1,5 @@
 #define COUNTALLWORDS ScoreAllWords_dedupe
+#define DEBUG true
 
 #include <iostream>
 #include "trie.h"
@@ -11,6 +12,7 @@
 #include <iterator>
 #include "robin_hood.h"
 #include <set>
+#include <queue>
 
 
 struct struct_word {
@@ -35,7 +37,7 @@ bool CompareWordPoints(const struct_word &a, const struct_word &b);
 
 void ScoreDictionary(const std::string &dictionary_path);
 
-struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters, bool debug);
+struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters);
 
 std::array<int, 26> SubtractLetters(std::array<int, 26> a, std::array<int, 26> b);
 
@@ -45,8 +47,11 @@ int ScoreAllWords_std(std::string s);
 
 int ScoreAllWords_dedupe(std::string s);
 
+int AddWordOverlap(std::string &baseword, std::string &newword);
 
 bool CanAddWord(std::array<int, 26> remaining_letters, std::array<int, 26> word_letters);
+
+void PrintWord(struct_word w);
 
 template<typename Iter>
 Iter removeDuplicates(Iter begin, Iter end);
@@ -65,19 +70,31 @@ int main() {
     struct_word arrangement = {"", 0, gamecounts};
     std::array<int, 26> remainingletters = gamecounts;
 
+    std::array<int, 26> trimmedcount = {};
+
+//    std::string a="hello";
+//    std::string b="hi";
+//    auto overlap=AddWordOverlap(a,b);
+//    std::cout<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
+
+//    b="odasfa";
+//    auto overlap=AddWordOverlap(a,b);
+//    std::cout<<overlap<<" "<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
+
+//    b="olledf";
+//    overlap=AddWordOverlap(a,b);
+//    std::cout<<overlap<<" "<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
+
+
+
+
     std::string prevword = arrangement.word;
     //Exit our loop if the word did not change, e.g. the best addition did not add anything.
-    while ((arrangement.word!=prevword) || (prevword=="")) {
+    while ((arrangement.word != prevword) || (prevword == "")) {
         prevword = arrangement.word;
-        arrangement = BestAddition(arrangement, remainingletters, false);
+        arrangement = BestAddition(arrangement, remainingletters);
         remainingletters = SubtractLetters(gamecounts, arrangement.letters);
-
     }
-
-
-//        arrangement = BestAddition(arrangement, remainingletters, false);
-//        remainingletters = SubtractLetters(gamecounts, arrangement.letters);
-
 }
 
 void ScoreDictionary(const std::string &dictionary_path) {
@@ -99,60 +116,103 @@ void ScoreDictionary(const std::string &dictionary_path) {
 
 }
 
-struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters, bool debug) {
+int AddWordOverlap(std::string &baseword, std::string &newword) {
+    // Returns the number of letters of overlap
+
+    unsigned long lenbaseword = baseword.length();
+    unsigned long lennewword = newword.length();
+    for (int i = 1; i < baseword.length(); i++) {
+        int j = 0;
+
+        while ((baseword[i + j] == newword[j]) && (j < lennewword) && (i + j < lenbaseword)) {
+            j++;
+        }
+
+        if (i + j == lenbaseword) {
+            return j;
+        }
+    }
+    return 0;
+//    return minlength;
+}
+
+struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters) {
+    std::array<int, 26> trimmedcount = {};
 
     struct_word bestword = baseword;
     if (bestword.word.length() == 0) {
         bestword.word = 'a';
     }
 
-    float bestefficiency=0.0;
+    float bestefficiency = 0.0;
+
 
     for (auto word = begin(wordinfo_points); word != end(wordinfo_points); ++word) {
-        if (debug) {
-            std::cout << baseword.word << " " << word->word << " " << CanAddWord(remaining_letters, word->letters)
-                      << std::endl;
-        }
-        if (CanAddWord(remaining_letters, word->letters)) {
-            std::string w = baseword.word + word->word;
+        int overlap = 0;
+        std::string trimmedword = "";
+
+        // Try to add the word to the end
+        overlap = AddWordOverlap(baseword.word, word->word);
+        if (overlap == word->word.length()) continue;
+
+        trimmedword = (word->word).substr(overlap, (word->word).length() - overlap);
+
+        trimmedcount.fill(0);
+        CountLetters(trimmedword, trimmedcount);
+
+        if (CanAddWord(remaining_letters, trimmedcount)) {
+            std::string w = baseword.word + trimmedword;
             int s = COUNTALLWORDS(w);
 
-//            if (s > bestword.score) {
-            if ((float)s/(float)w.length() > bestefficiency) {
-                bestefficiency=(float)s/(float)w.length();
+            if (s > bestword.score) {
+//            if ((float) s / (float) w.length() > bestefficiency) {
+                bestefficiency = (float) s / (float) w.length();
                 std::array<int, 26> l{};
                 CountLetters(w, l);
 
                 bestword = struct_word{w, s, l};
-                std::array<int, 26> x = SubtractLetters(remaining_letters, word->letters);
-                std::cout << w << ", " << s << ", " << (float) s / (float) bestword.word.size() << ", ";
-                for (int i = 0; i < 26; i++) {
-                    std::cout << SubtractLetters(gamecounts, l)[i] << " ";
-                }
-                std::cout << std::endl;
+                if (DEBUG) PrintWord(bestword);
             }
+        }
 
-            w = baseword.word + word->word;
-            s = COUNTALLWORDS(w);
+        if (baseword.word == "") continue;
 
-//            if (s > bestword.score) {
-            if ((float)s/(float)w.length() > bestefficiency) {
-                bestefficiency=(float)s/(float)w.length();
+        // Try to add the word to the start
+        overlap = AddWordOverlap(word->word, baseword.word);
+        if (overlap == word->word.length()) continue;
+
+        trimmedword = word->word.substr(0, word->word.length() - overlap);
+
+
+
+        trimmedcount.fill(0);
+        CountLetters(trimmedword, trimmedcount);
+
+        if (CanAddWord(remaining_letters, trimmedcount)) {
+            std::string w = trimmedword + baseword.word;
+
+            int s = COUNTALLWORDS(w);
+            if (s > bestword.score) {
+//            if ((float) s / (float) w.length() >= bestefficiency) {
+                bestefficiency = (float) s / (float) w.length();
                 std::array<int, 26> l{};
                 CountLetters(w, l);
 
                 bestword = struct_word{w, s, l};
-                std::array<int, 26> x = SubtractLetters(remaining_letters, word->letters);
-                std::cout << w << ", " << s << ", " << (float) s / (float) bestword.word.size() << ", ";
-                for (int i = 0; i < 26; i++) {
-                    std::cout << SubtractLetters(gamecounts, l)[i] << " ";
-                }
-                std::cout << std::endl;
+                if (DEBUG) PrintWord(bestword);
             }
         }
     }
-
     return bestword;
+}
+
+void PrintWord(struct_word w) {
+    std::cout << w.word << ", " << w.score << ", " << (float) w.score / (float) w.word.size() << ", ";
+    for (int i = 0; i < 26; i++) {
+        std::cout << SubtractLetters(gamecounts, w.letters)[i] << " ";
+    }
+    std::cout << std::endl;
+
 }
 
 std::array<int, 26> SubtractLetters(std::array<int, 26> a, std::array<int, 26> b) {
@@ -272,7 +332,6 @@ int ScoreAllWords_std(std::string s) {
             auto word = s.substr(start, wordend);
 
             if (foundwords.find(word) == foundwords.end()) {
-//                std::cout<<word<<std::endl;
                 foundwords.insert(std::make_pair(word, true));
                 score += ScoreWord(word);
             }

@@ -22,6 +22,8 @@ struct struct_word {
 std::array<int, 26> gamecounts = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
 
 Trie *dict;
+Trie *dict_reversed;
+
 std::unordered_map<std::string, struct_word> wordinfo_letters;
 std::vector<struct_word> wordinfo_points;
 
@@ -53,18 +55,23 @@ int main() {
     //                                a b c d e  f g h i j k l m n o p q r s t u v w x y z
 
     auto dictionary_path = "/Users/rvilim/repos/scrabbulizer/enable1.txt";
+    auto dictionary_reversed_path = "/Users/rvilim/repos/scrabbulizer/enable1_reversed.txt";
 
     dict = Trie::CreateFromFile(dictionary_path);
+    dict_reversed = Trie::CreateFromFile(dictionary_reversed_path);
+
     ScoreDictionary(dictionary_path);
 
     struct_word arrangement = {"", 0, gamecounts};
     std::array<int, 26> remainingletters = gamecounts;
 
-    std::cout<<COUNTALLWORDS("photolithographicalto")<<std::endl;
-
-    while (arrangement.word.size() <= 98) {
+    std::string prevword = arrangement.word;
+    //Exit our loop if the word did not change, e.g. the best addition did not add anything.
+    while ((arrangement.word!=prevword) || (prevword=="")) {
+        prevword = arrangement.word;
         arrangement = BestAddition(arrangement, remainingletters, false);
         remainingletters = SubtractLetters(gamecounts, arrangement.letters);
+
     }
 
 
@@ -144,6 +151,7 @@ struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_le
             }
         }
     }
+
     return bestword;
 }
 

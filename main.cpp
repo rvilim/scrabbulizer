@@ -1,5 +1,5 @@
 #define COUNTALLWORDS ScoreAllWords_dedupe
-#define DEBUG true
+#define DEBUG false
 
 #include <iostream>
 #include "trie.h"
@@ -13,12 +13,20 @@
 #include "robin_hood.h"
 #include <set>
 #include <queue>
-
+//#include <omp.h>
 
 struct struct_word {
     std::string word;
     int score;
     std::array<int, 26> letters;
+};
+
+
+
+struct minheap{
+    bool operator()(const struct_word& a,const struct_word& b) const{
+        return a.score>b.score;
+    }
 };
 
 std::array<int, 26> gamecounts = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
@@ -37,7 +45,7 @@ bool CompareWordPoints(const struct_word &a, const struct_word &b);
 
 void ScoreDictionary(const std::string &dictionary_path);
 
-struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters);
+std::vector<struct_word>  BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters);
 
 std::array<int, 26> SubtractLetters(std::array<int, 26> a, std::array<int, 26> b);
 
@@ -56,6 +64,9 @@ void PrintWord(struct_word w);
 template<typename Iter>
 Iter removeDuplicates(Iter begin, Iter end);
 
+void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize);
+std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num);
+
 int main() {
     //                                a b c d e  f g h i j k l m n o p q r s t u v w x y z
 
@@ -72,31 +83,86 @@ int main() {
 
     std::array<int, 26> trimmedcount = {};
 
-//    std::string a="hello";
-//    std::string b="hi";
-//    auto overlap=AddWordOverlap(a,b);
-//    std::cout<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
+    std::vector<struct_word> bestwords;
 
-//    b="odasfa";
-//    auto overlap=AddWordOverlap(a,b);
-//    std::cout<<overlap<<" "<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
-
-//    b="olledf";
-//    overlap=AddWordOverlap(a,b);
-//    std::cout<<overlap<<" "<<a.substr(0,a.length()-overlap)<<"_"<<b<<std::endl;
-
-
-
-
-    std::string prevword = arrangement.word;
-    //Exit our loop if the word did not change, e.g. the best addition did not add anything.
-    while ((arrangement.word != prevword) || (prevword == "")) {
-        prevword = arrangement.word;
-        arrangement = BestAddition(arrangement, remainingletters);
-        remainingletters = SubtractLetters(gamecounts, arrangement.letters);
+    auto a = GetTopAdditions({"", 0, gamecounts}, gamecounts, 1);
+    std::cout<<"Leaders"<<std::endl;
+    for(int i=0; i<a.size(); i++){
+        std::cout<<a[i].score<< " "<<a[i].word<<std::endl;
     }
+
+//    auto oneword = BestAddition({"", 0, gamecounts}, gamecounts);
+//    std::vector<struct_word> twowords;
+//    std::vector<struct_word> threewords;
+
+//    for(int i=0;i<oneword.size(); i++){
+//        std::cout<<oneword[i].word<<" "<<oneword[i].score<<std::endl;
+//    }
+//
+//    for(int i=0; i<oneword.size();i++) {
+//        auto l = SubtractLetters(gamecounts, oneword[i].letters);
+//        auto b = BestAddition(oneword[i], l);
+//        twowords.insert(twowords.end(), b.begin(), b.end());
+//    }
+//    std::cout<<"--------"<<std::endl;
+//    for(int i=0;i<twowords.size(); i++){
+//        std::cout<<twowords[i].word<<" "<<twowords[i].score<<std::endl;
+//    }
+//
+//    for(int i=0; i<twowords.size();i++) {
+//        auto l = SubtractLetters(gamecounts, twowords[i].letters);
+//        auto b = BestAddition(twowords[i], l);
+//        threewords.insert(threewords.end(), b.begin(), b.end());
+//    }
+//    std::cout<<"--------"<<std::endl;
+//    for(int i=0;i<twowords.size(); i++){
+//        std::cout<<threewords[i].word<<" "<<threewords[i].score<<std::endl;
+//    }
+    //Exit our loop if the word did not change, e.g. the best addition did not add anything.
+//    while (prevwords[0].word=="") {
+//        for(int i=0; i<prevwords.size(); i++){
+//            arrangement = BestAddition(arrangement, remainingletters);
+//            remainingletters = SubtractLetters(gamecounts, arrangement.letters);
+//
+//        }
+//    }
+//    auto wtf = BestAddition(arrangement, remainingletters);
+//
+//    for(auto & i : wtf){
+//        std::cout<<i.word<<" "<<i.score<<std::endl;
+//    }
+//    std::cout<<wtf.top().first<<" "<<wtf.top().second.word<<std::endl;
 }
 
+std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num){
+    std::vector<struct_word> bestwords = BestAddition(word, remainingletters);
+    std::vector<struct_word> r;
+
+    if (bestwords.size()==0){
+        r.push_back(word);
+    }
+
+    for(auto & bestword : bestwords){
+        std::cout<<"level "<<num<<std::endl;
+
+        auto l = SubtractLetters(gamecounts, bestword.letters);
+        auto a = GetTopAdditions(bestword, l, num+1);
+
+        r.insert(r.end(), a.begin(), a.end());
+    }
+
+    return r;
+}
+void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize){
+
+    if ((bestwords.size()<heapsize)||(bestwords.front().score<newword.score)){
+        bestwords.push_back(newword); std::push_heap (bestwords.begin(),bestwords.end(), minheap());
+
+        if(bestwords.size()>heapsize){
+            std::pop_heap(bestwords.begin(), bestwords.end(), minheap()); bestwords.pop_back();
+        }
+    }
+}
 void ScoreDictionary(const std::string &dictionary_path) {
 
     std::string s;
@@ -136,8 +202,11 @@ int AddWordOverlap(std::string &baseword, std::string &newword) {
 //    return minlength;
 }
 
-struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_letters) {
+
+std::vector<struct_word> BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters) {
+    const int n_candidates = 2;
     std::array<int, 26> trimmedcount = {};
+    std::vector<struct_word> bestwords;
 
     struct_word bestword = baseword;
     if (bestword.word.length() == 0) {
@@ -164,13 +233,16 @@ struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_le
             std::string w = baseword.word + trimmedword;
             int s = COUNTALLWORDS(w);
 
-            if (s > bestword.score) {
+            if (s>bestword.score){
+//            if (s > bestword.score) {
 //            if ((float) s / (float) w.length() > bestefficiency) {
-                bestefficiency = (float) s / (float) w.length();
+//                bestefficiency = (float) s / (float) w.length();
                 std::array<int, 26> l{};
                 CountLetters(w, l);
 
                 bestword = struct_word{w, s, l};
+
+                AddWordToHeap(bestwords, bestword, n_candidates);
                 if (DEBUG) PrintWord(bestword);
             }
         }
@@ -182,8 +254,6 @@ struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_le
         if (overlap == word->word.length()) continue;
 
         trimmedword = word->word.substr(0, word->word.length() - overlap);
-
-
 
         trimmedcount.fill(0);
         CountLetters(trimmedword, trimmedcount);
@@ -199,11 +269,14 @@ struct_word BestAddition(struct_word baseword, std::array<int, 26> &remaining_le
                 CountLetters(w, l);
 
                 bestword = struct_word{w, s, l};
+                AddWordToHeap(bestwords, bestword, n_candidates);
                 if (DEBUG) PrintWord(bestword);
             }
         }
+
     }
-    return bestword;
+
+    return bestwords;
 }
 
 void PrintWord(struct_word w) {

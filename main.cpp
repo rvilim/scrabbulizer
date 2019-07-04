@@ -90,48 +90,6 @@ int main() {
     for(int i=0; i<a.size(); i++){
         std::cout<<a[i].score<< " "<<a[i].word<<std::endl;
     }
-
-//    auto oneword = BestAddition({"", 0, gamecounts}, gamecounts);
-//    std::vector<struct_word> twowords;
-//    std::vector<struct_word> threewords;
-
-//    for(int i=0;i<oneword.size(); i++){
-//        std::cout<<oneword[i].word<<" "<<oneword[i].score<<std::endl;
-//    }
-//
-//    for(int i=0; i<oneword.size();i++) {
-//        auto l = SubtractLetters(gamecounts, oneword[i].letters);
-//        auto b = BestAddition(oneword[i], l);
-//        twowords.insert(twowords.end(), b.begin(), b.end());
-//    }
-//    std::cout<<"--------"<<std::endl;
-//    for(int i=0;i<twowords.size(); i++){
-//        std::cout<<twowords[i].word<<" "<<twowords[i].score<<std::endl;
-//    }
-//
-//    for(int i=0; i<twowords.size();i++) {
-//        auto l = SubtractLetters(gamecounts, twowords[i].letters);
-//        auto b = BestAddition(twowords[i], l);
-//        threewords.insert(threewords.end(), b.begin(), b.end());
-//    }
-//    std::cout<<"--------"<<std::endl;
-//    for(int i=0;i<twowords.size(); i++){
-//        std::cout<<threewords[i].word<<" "<<threewords[i].score<<std::endl;
-//    }
-    //Exit our loop if the word did not change, e.g. the best addition did not add anything.
-//    while (prevwords[0].word=="") {
-//        for(int i=0; i<prevwords.size(); i++){
-//            arrangement = BestAddition(arrangement, remainingletters);
-//            remainingletters = SubtractLetters(gamecounts, arrangement.letters);
-//
-//        }
-//    }
-//    auto wtf = BestAddition(arrangement, remainingletters);
-//
-//    for(auto & i : wtf){
-//        std::cout<<i.word<<" "<<i.score<<std::endl;
-//    }
-//    std::cout<<wtf.top().first<<" "<<wtf.top().second.word<<std::endl;
 }
 
 std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num){

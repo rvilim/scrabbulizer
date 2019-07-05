@@ -109,14 +109,14 @@ bool Trie::IsWord(const char* wd) const {
     return false; //otherwise return false
 }
 
-void Trie::WordsStartWith(const char* wd, int pos, std::vector<std::pair<std::string, bool>>& words) const {
+void Trie::WordsStartWith(const char* wd, int pos, std::vector<std::string>& words) const {
 //    std::cout<<wd<<" "<<IsWord()<<std::endl;
 //    *wordendsat=IsWord();
 
 //std::string first(name, name + 5);
     if (IsWord()){
         std::string foundword(wd-pos, pos);
-        words.push_back(std::make_pair(foundword, true));
+        words.push_back(foundword);
     }
 
     int c = *wd - 'a';

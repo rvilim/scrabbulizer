@@ -49,7 +49,7 @@ public:
     void SetIsWord(bool w) { bits_ &= ~(1<<26); bits_ |= (w << 26); }
 
 //    void WordsStartWith(const char* wd, bool* wordendsat) const;
-    void WordsStartWith(const char* wd, int pos, std::vector<std::pair<std::string, bool>>& words) const;
+    void WordsStartWith(const char* wd, int pos, std::vector<std::string>& words) const;
     void WordsStartWith_pos(const char* wd, int pos, std::vector<int>& wordends) const;
 
     // Trie-building methods (slow)

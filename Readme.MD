@@ -1,6 +1,7 @@
 # Scrabbulizer
-Attempts to find high scoring scrabble words using up the entire tilebag for the Riddler due July 17th 2019 (https://fivethirtyeight.com/features/whats-your-best-scrabble-string/)[https://fivethirtyeight.com/features/whats-your-best-scrabble-string/].
+Attempts to find high scoring scrabble words using up the entire tilebag for [The Riddler](https://fivethirtyeight.com/features/whats-your-best-scrabble-string/) due July 17th 2019.
 
+## Strategy
 The strategy is:
 - Score all the words, as well as their subwords
 - Pick the top N words (base words), recursively find the M words (new words) in the dictionary that will result in the
@@ -23,3 +24,9 @@ in some short sightednes on the programs part. To mitigate this we do a few thin
     but wastes tiles. I have arbitrarily set this at 7, I only consider new words if the base word + the new word has a
     tile efficiency greater than 7.
 
+## Data Structures:
+The root of this is the Trie, which stores the whole dictionary in a tree structure. This lets us quickly search for
+words in the dictionary, but also find words that begin with certain letters. This is crucial for the scoring function
+which is where this program spends the most time. If we stored our dictionary in a hash table, scoring all the words +
+subwords would be N^2 in aggregated word length. Using a trie takes this down to N Log(M) in aggregate word length (N) and
+average sub-word length (M). I stole my Trie implementation from (Dan Vanderkam)[https://github.com/danvk/performance-boggle].

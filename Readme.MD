@@ -50,7 +50,7 @@ This expects the dictionary to be at "/enable1.txt", do that. This also requires
 g++ -fopenmp -Ofast -march=native -std=gnu++11 -o scrabbulizer main.cpp scrabble.cpp trie.cpp
 ./scrabbulizer
 ```
-This will priunt the best word it has found so far (approximately) as well as statsu about that word. If you cat this
+This will print the best word it has found so far (approximately) as well as statsu about that word. If you cat this
 into a file you can see the _actual_ top word with
 
 ```bash

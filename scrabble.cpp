@@ -3,42 +3,61 @@
 //
 #include "scrabble.h"
 
-std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num){
-    std::vector<struct_word> bestwords = BestAddition(word, remainingletters);
-    std::vector<struct_word> r;
 
-    if (bestwords.size()==0){
+std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num) {
+    std::vector<int> numlevel = {72, 15, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
+    std::vector<struct_word> bestwords = BestAddition(word, remainingletters, numlevel[num]);
+    std::vector<struct_word> r;
+    struct_word bestscore = {"", 0, gamecounts, std::vector<int>{}};
+
+    if (bestwords.size() == 0) {
         r.push_back(word);
     }
+#pragma omp parallel
+    {
+#pragma omp for nowait //fill vec_private in parallel
+        for (int i = 0; i < bestwords.size(); i++) {
+//            std::cout << "level " << num << std::endl;
 
-    for(auto & bestword : bestwords){
-        std::cout<<"level "<<num<<std::endl;
+            auto l = SubtractLetters(gamecounts, bestwords[i].letters);
+            auto a = GetTopAdditions(bestwords[i], l, num + 1);
 
-        auto l = SubtractLetters(gamecounts, bestword.letters);
-        auto a = GetTopAdditions(bestword, l, num+1);
-
-        r.insert(r.end(), a.begin(), a.end());
+            for (int j = 0; j < a.size(); j++) {
+#pragma omp critical
+                {
+                    if (a[j].score > bestscore.score) {
+                        bestscore = a[j];
+                        PrintWord(a[j]);
+                    }
+                }
+            }
+#pragma omp critical
+            r.insert(r.end(), a.begin(), a.end());
+        }
     }
-
     return r;
 }
-void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize){
 
-    if ((bestwords.size()<heapsize)|| ((bestwords.size()>=heapsize) && (bestwords.front().score<newword.score))){
-        bestwords.push_back(newword); std::push_heap (bestwords.begin(),bestwords.end(), minheap());
+void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize) {
 
-        if(bestwords.size()>heapsize){
-            std::pop_heap(bestwords.begin(), bestwords.end(), minheap()); bestwords.pop_back();
+    if ((newword.tileefficiency > 7) && ((bestwords.size() < heapsize) || ((bestwords.size() >= heapsize) &&
+                                                                           (bestwords.front().score <
+                                                                            newword.score)))) {
+        bestwords.push_back(newword);
+        std::push_heap(bestwords.begin(), bestwords.end(), minheap());
+
+        if (bestwords.size() > heapsize) {
+            std::pop_heap(bestwords.begin(), bestwords.end(), minheap());
+            bestwords.pop_back();
         }
-        for(int i=0; i<bestwords.size(); i++){
+        for (int i = 0; i < bestwords.size(); i++) {
             if (DEBUG) PrintWord(bestwords[i]);
         }
-        std::cout<<"*****"<<std::endl;
-        std::cout<<std::endl;
-
     }
 
 }
+
+
 void ScoreDictionary(const std::string &dictionary_path) {
 
     std::string s;
@@ -78,17 +97,17 @@ int AddWordOverlap(std::string &baseword, std::string &newword) {
     return 0;
 }
 
-void AddWord(struct_word & baseword, struct_word & word, const std::array<int, 26> &remaining_letters,
-             std::vector<struct_word> &bestwords, const int &n_candidates, bool append){
+void AddWord(struct_word &baseword, struct_word &word, const std::array<int, 26> &remaining_letters,
+             std::vector<struct_word> &bestwords, const int &n_candidates, bool append) {
     int overlap = 0;
     std::string trimmedword;
     std::array<int, 26> trimmedcount = {};
 
     //If this is the first word, then trimmedword = the word we are looking at
-    trimmedword=word.word;
+    trimmedword = word.word;
 
     //Try to add it to the end
-    if (baseword.word.length()!=0) {
+    if (baseword.word.length() != 0) {
         overlap = AddWordOverlap(baseword.word, word.word);
         if (overlap == word.word.length()) return;
 
@@ -105,15 +124,15 @@ void AddWord(struct_word & baseword, struct_word & word, const std::array<int, 2
         std::vector<int> b{};
         std::array<int, 26> l{};
 
-        if (append){
+        if (append) {
             w = baseword.word + trimmedword;
-        }else{
+        } else {
             w = trimmedword + baseword.word;
         }
 
         CountLetters(w, l);
 
-        auto r = SubtractLetters(gamecounts,l);
+        auto r = SubtractLetters(gamecounts, l);
         auto q = struct_word{w, -1, l, b};
         ScoreAllWords(q);
 
@@ -121,8 +140,8 @@ void AddWord(struct_word & baseword, struct_word & word, const std::array<int, 2
     }
 }
 
-std::vector<struct_word> BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters) {
-    const int n_candidates = 4;
+std::vector<struct_word>
+BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters, int n_candidates) {
     std::vector<struct_word> bestwords;
 
     for (auto word = begin(wordinfo_points); word != end(wordinfo_points); ++word) {
@@ -133,21 +152,59 @@ std::vector<struct_word> BestAddition(struct_word baseword, const std::array<int
 }
 
 void PrintWord(struct_word w) {
-    for(int i=0; i<w.word.length();i++){
-        auto it = std::find (w.blankpositions.begin(), w.blankpositions.end(), i);
+    for (int i = 0; i < w.word.length(); i++) {
+        auto it = std::find(w.blankpositions.begin(), w.blankpositions.end(), i);
 
-        if (it!=w.blankpositions.end()){
-            std::cout<<"|"<<w.word[i]<<"|";
-        }else{
-            std::cout<<w.word[i];
+        if (it != w.blankpositions.end()) {
+            std::cout << "|" << w.word[i] << "|";
+        } else {
+            std::cout << w.word[i];
         }
     }
 
-    std::cout <<", Score: " << w.score << ", Score Density: " << (float) w.score / (float) w.word.size() << ", Letters: ";
+    std::cout << ", Score: " << w.score << ", Length Efficiency: " << w.lengthefficiency << ", Tile Efficiency "
+              << w.tileefficiency << ", Remaining Letters: ";
     for (int i = 0; i < 26; i++) {
         std::cout << SubtractLetters(gamecounts, w.letters)[i] << " ";
     }
     std::cout << std::endl;
+}
+
+void PrintWordFull(struct_word w) {
+    auto words = ScoreAllWords(w);
+    std::cout << "Word: ";
+    for (int i = 0; i < w.word.length(); i++) {
+        auto it = std::find(w.blankpositions.begin(), w.blankpositions.end(), i);
+
+        if (it != w.blankpositions.end()) {
+            std::cout << "|" << w.word[i] << "|";
+        } else {
+            std::cout << w.word[i];
+        }
+    }
+    std::cout << std::endl;
+    std::cout << "Score: " << w.score << std::endl;
+    std::cout << "Length Efficiency: " << w.lengthefficiency << std::endl;
+    std::cout << "Tile Efficiency " << w.tileefficiency << std::endl;
+
+    std::cout << "Used Letters: ";
+    for (int i = 0; i < 26; i++) {
+        std::cout << w.letters[i] << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Remaining Letters: ";
+    for (int i = 0; i < 26; i++) {
+        std::cout << SubtractLetters(gamecounts, w.letters)[i] << " ";
+    }
+    std::cout << std::endl;
+
+
+    std::cout << std::endl;
+    std::cout << "Words:" << std::endl;
+    for (int i = 0; i < words.size(); i++) {
+        std::cout << words[i] << std::endl;
+    }
 
 }
 
@@ -188,7 +245,7 @@ void CountLetters(std::string s, std::array<int, 26> &count) {
 }
 
 template<typename Iter>
-Iter removeDuplicates(Iter begin, Iter end) {
+Iter RemoveDuplicates(Iter begin, Iter end) {
     auto it = begin;
     while (it != end) {
         auto next = std::next(it);
@@ -202,7 +259,7 @@ Iter removeDuplicates(Iter begin, Iter end) {
     return end;
 }
 
-void ScoreAllWords(struct_word &s) {
+std::vector<std::string> ScoreAllWords(struct_word &s) {
     const int letters[26] = {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10};
     int score = 0;
     int n = s.word.length();
@@ -213,24 +270,24 @@ void ScoreAllWords(struct_word &s) {
     std::vector<std::string> words;
     std::vector<std::pair<int, int>> usagecost; //cost, position
 
-    for(int i=0; i<s.word.length(); i++){
-        usagecost.emplace_back(std::pair<int, int> {0, i});
+    for (int i = 0; i < s.word.length(); i++) {
+        usagecost.emplace_back(std::pair<int, int>{0, i});
     }
 
     words.reserve(s.word.length());
 
     for (int start = 0; start <= s.word.length() - 2; start++) {
-        int before_size=words.size();
+        int before_size = words.size();
         dict->WordsStartWith(char_array + start, 0, words);
 
-        for(int i=before_size; i<words.size(); i++){
-            for(int j=0; j<words[i].length();j++){
-                usagecost[start+j].first+=letters[(int)s.word[start+j]-(int)'a'];
+        for (int i = before_size; i < words.size(); i++) {
+            for (int j = 0; j < words[i].length(); j++) {
+                usagecost[start + j].first += letters[(int) s.word[start + j] - (int) 'a'];
             }
         }
     }
 
-    words.erase(removeDuplicates(words.begin(), words.end()), words.end());
+    words.erase(RemoveDuplicates(words.begin(), words.end()), words.end());
 
     std::array<int, 26> remainingletters = SubtractLetters(gamecounts, s.letters);
     GetBlankPosition(s.blankpositions, usagecost, s.word, remainingletters);
@@ -239,17 +296,28 @@ void ScoreAllWords(struct_word &s) {
         score += ScoreWord(*it);
     }
 
-    s.score=score;
+    int tilecost = ScoreWord(s.word);
+    for (int i = 0; i < s.blankpositions.size(); i++) {
+        score -= usagecost[s.blankpositions[i]].first;
+        tilecost -= usagecost[s.blankpositions[i]].first;
+    }
+
+
+    s.lengthefficiency = (float) score / (float) s.word.length();
+    s.tileefficiency = (float) score / (float) tilecost;
+    s.score = score;
+
+    return words;
 }
 
-void GetBlankPosition(std::vector<int> &blankposition, std::vector<std::pair<int, int>> & usagecost, std::string word,
+void GetBlankPosition(std::vector<int> &blankposition, std::vector<std::pair<int, int>> &usagecost, std::string word,
                       std::array<int, 26> remainingletters) {
     std::sort(usagecost.begin(), usagecost.end());
 
-    for(int i=0; i<26; i++){
-        int j=0;
-        while(remainingletters[i]<0){
-            if(((int)word[usagecost[j].second]-(int)'a')==i){
+    for (int i = 0; i < 26; i++) {
+        int j = 0;
+        while (remainingletters[i] < 0) {
+            if (((int) word[usagecost[j].second] - (int) 'a') == i) {
 
                 blankposition.push_back(usagecost[j].second);
                 remainingletters[i]++;

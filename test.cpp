@@ -145,7 +145,7 @@ TEST_CASE( "Best addition after", "[BestAddition]" ) {
     };
 
     auto r= SubtractLetters(gamecounts, l);
-    auto a = BestAddition(baseword, r);
+    auto a = BestAddition(baseword, r,5);
 
     std::sort(a.begin(), a.end(), CompareByWordScore);
 

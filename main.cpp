@@ -18,13 +18,16 @@ Trie *dict;
 std::vector<struct_word> wordinfo_points;
 
 int main() {
-    auto dictionary_path = "/Users/rvilim/repos/scrabbulizer/enable1.txt";
+
+    auto dictionary_path = "/enable1.txt";
     gamecounts =  {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
     dict = Trie::CreateFromFile(dictionary_path);
 
     ScoreDictionary(dictionary_path);
 
-    struct_word arrangement = {"", 0, gamecounts};
+    std::vector<int> blanks;
+    struct_word arrangement = {"", 0, gamecounts, blanks};
+
     std::array<int, 26> remainingletters = gamecounts;
 
     std::array<int, 26> trimmedcount = {};
@@ -32,7 +35,7 @@ int main() {
     std::vector<struct_word> bestwords;
 
 
-    auto a = GetTopAdditions({"", 0, gamecounts}, gamecounts, 1);
+    auto a = GetTopAdditions({"", 0, gamecounts}, gamecounts, 0);
     std::cout<<"Leaders"<<std::endl;
     for(int i=0; i<a.size(); i++){
         std::cout<<a[i].score<< " "<<a[i].word<<std::endl;

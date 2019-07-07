@@ -63,7 +63,8 @@ Feel free to play around with numlevel and mintileefficiency that are hardcoded 
 cutoff for tile efficiency and will determine how quickly you get to good words vs the eventual "best" word the algorithm finds.
 
 ### Reporting
-If you want to know about a specific word, then use explainword.cpp
+If you want to know about a specific word, then use explainword.cpp with the argument as the word. In this case we want to
+know about "myword"
 ```bash
 > g++ -std=gnu++11 -o explainword explainword.cpp scrabble.cpp trie.cpp
 > ./explainword myword

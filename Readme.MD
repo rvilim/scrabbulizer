@@ -23,8 +23,8 @@ in some short sightednes on the programs part. To mitigate this we do a few thin
   - The concept of "tile efficiency". This is the score of a word (including all subwords) divided by the score of the
     word excluding subwords. Basically a measure of how many times each tile is getting repeated. We would ideally like
     to use words with a high tile efficiency so that we don't blow a ton of tiles on a word that has the highest score,
-    but wastes tiles. I have arbitrarily set this at 7, I only consider new words if the base word + the new word has a
-    tile efficiency greater than 7.
+    but wastes tiles. I have arbitrarily set this at 6, I only consider new words if the base word + the new word has a
+    tile efficiency greater than 6.
 
 ## Data Structures:
 The root of this is the Trie, which stores the whole dictionary in a tree structure. This lets us quickly search for

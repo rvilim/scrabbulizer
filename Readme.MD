@@ -84,12 +84,12 @@ My current "best" word is
 
 <details><summary>recontextualizedhe|m|idemisemiquavers|z|oogeographicallyredeveloperstowawaysunjointingriffinkabobattunad</summary>
 <p>
-*Word:* recontextualizedhe|m|idemisemiquavers|z|oogeographicallyredeveloperstowawaysunjointingriffinkabobattunad
-*Score:* 1505
-*Length Efficiency:* 15.05
-*Tile Efficiency:* 8.00532
-*Used Letters:* 9 2 2 4 12 2 3 2 9 1 1 4 3 6 8 2 1 6 4 6 4 2 2 1 2 2
-*Remaining Letters:* 0 0 0 0 0 0 0 0 0 0 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 -1
+**Word:** recontextualizedhe|m|idemisemiquavers|z|oogeographicallyredeveloperstowawaysunjointingriffinkabobattunad
+**Score:* 1505
+**Length Efficiency:** 15.05
+**Tile Efficiency:** 8.00532
+**Used Letters:** 9 2 2 4 12 2 3 2 9 1 1 4 3 6 8 2 1 6 4 6 4 2 2 1 2 2
+**Remaining Letters:** 0 0 0 0 0 0 0 0 0 0 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 -1
 
 #### Words:
 re, rec, recon, recontextualize, recontextualized, con, conte, context, contextual, contextualize, contextualized, on, text, textual, ex, al, li, zed, ed, edh, he, hem, hemidemisemiquaver, hemidemisemiquavers, em, mi, mid, id, idem, de, demise, demisemiquaver, demisemiquavers, mis, mise, is, semi, semiquaver, semiquavers, qua, quaver, quavers, ave, aver, avers, er, ers, zoo, zoogeographic, zoogeographical, zoogeographically, geographic, geographical, geographically, graph, graphic, graphical, graphically, rap, phi, hi, hic, call, all, ally, lyre, red, rede, redevelop, redeveloper, redevelopers, dev, devel, develop, develope, developer, developers, eve, el, elope, eloper, elopers, lo, lop, lope, loper, lopers, op, ope, pe, per, erst, stow, stowaway, stowaways, to, tow, towaway, towaways, ow, waw, aw, awa, away, way, ways, ay, ays, sun, un, unjoint, unjointing, jo, join, joint, jointing, in, inti, ti, tin, ting, griff, griffin, rif, riff, if, iff, fin, fink, ink, ka, kab, kabob, ab, abo, bo, bob, ba, bat, batt, battu, at, att, tun, tuna, na, ad

@@ -5,7 +5,7 @@
 
 
 std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num) {
-    std::vector<int> numlevel = {72, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
+    std::vector<int> numlevel = {72, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
     std::vector<float> mintileefficiency = {6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0};
     std::vector<struct_word> bestwords = BestAddition(word, remainingletters, numlevel[num], mintileefficiency[num]);
     std::vector<struct_word> r;

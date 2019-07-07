@@ -57,7 +57,7 @@ additionally a blank in the printed word is indicated by "|" on either side of t
 This means "ri|d|dler" means that a blank is used on the first d.
 
 ```bash
-> watch ./topout.sh
+> watch ./topout.sh outfile
 ```
 Feel free to play around with numlevel and mintileefficiency that are hardcoded into GetTopAdditions. These contro the minimum
 cutoff for tile efficiency and will determine how quickly you get to good words vs the eventual "best" word the algorithm finds.

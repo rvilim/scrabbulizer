@@ -84,9 +84,6 @@ My current "best" word is
 
 <details><summary>recontextualizedhe|m|idemisemiquavers|z|oogeographicallyredeveloperstowawaysunjointingriffinkabobattunad</summary>
 <p>
-<strong>Word:</strong> recontextualizedhe|m|idemisemiquavers|z|oogeographicallyredeveloperstowawaysunjointingriffinkabobattunad
-</p>
-<p>
 <strong>Score:</strong> 1505
 </p>
 <p>

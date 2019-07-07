@@ -30,3 +30,6 @@ words in the dictionary, but also find words that begin with certain letters. Th
 which is where this program spends the most time. If we stored our dictionary in a hash table, scoring all the words +
 subwords would be N^2 in aggregated word length. Using a trie takes this down to N Log(M) in aggregate word length (N) and
 average sub-word length (M). I stole my Trie implementation from (Dan Vanderkam)[https://github.com/danvk/performance-boggle].
+
+## Usage:
+This is trivially parallelized with OpenMP, there is a CMake file but this is ismple enojugh

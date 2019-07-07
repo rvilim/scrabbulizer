@@ -5,8 +5,9 @@
 
 
 std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> remainingletters, int num) {
-    std::vector<int> numlevel = {72, 15, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
-    std::vector<struct_word> bestwords = BestAddition(word, remainingletters, numlevel[num]);
+    std::vector<int> numlevel = {72, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
+    std::vector<float> mintileefficiency = {6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0};
+    std::vector<struct_word> bestwords = BestAddition(word, remainingletters, numlevel[num], mintileefficiency[num]);
     std::vector<struct_word> r;
     struct_word bestscore = {"", 0, gamecounts, std::vector<int>{}};
 
@@ -17,8 +18,11 @@ std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> r
     {
 #pragma omp for nowait //fill vec_private in parallel
         for (int i = 0; i < bestwords.size(); i++) {
-//            std::cout << "level " << num << std::endl;
-
+            if (num==2){
+                std::cout<<word.word<<" "<<bestwords[0].word<<std::endl;
+                std::cout<<word.word<<" "<<bestwords[1].word<<std::endl;
+                std::cout<<word.word<<" "<<bestwords[2].word<<std::endl;
+            }
             auto l = SubtractLetters(gamecounts, bestwords[i].letters);
             auto a = GetTopAdditions(bestwords[i], l, num + 1);
 
@@ -38,9 +42,9 @@ std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> r
     return r;
 }
 
-void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize) {
+void AddWordToHeap(std::vector<struct_word> &bestwords, struct_word newword, const int heapsize, const float mintileefficiency) {
 
-    if ((newword.tileefficiency > 7) && ((bestwords.size() < heapsize) || ((bestwords.size() >= heapsize) &&
+    if ((newword.tileefficiency > mintileefficiency) && ((bestwords.size() < heapsize) || ((bestwords.size() >= heapsize) &&
                                                                            (bestwords.front().score <
                                                                             newword.score)))) {
         bestwords.push_back(newword);
@@ -98,7 +102,7 @@ int AddWordOverlap(std::string &baseword, std::string &newword) {
 }
 
 void AddWord(struct_word &baseword, struct_word &word, const std::array<int, 26> &remaining_letters,
-             std::vector<struct_word> &bestwords, const int &n_candidates, bool append) {
+             std::vector<struct_word> &bestwords, const int &n_candidates, const float & mintileefficiency, bool append) {
     int overlap = 0;
     std::string trimmedword;
     std::array<int, 26> trimmedcount = {};
@@ -136,17 +140,17 @@ void AddWord(struct_word &baseword, struct_word &word, const std::array<int, 26>
         auto q = struct_word{w, -1, l, b};
         ScoreAllWords(q);
 
-        AddWordToHeap(bestwords, q, n_candidates);
+        AddWordToHeap(bestwords, q, n_candidates, mintileefficiency);
     }
 }
 
 std::vector<struct_word>
-BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters, int n_candidates) {
+BestAddition(struct_word baseword, const std::array<int, 26> &remaining_letters, int n_candidates, float mintileefficiency) {
     std::vector<struct_word> bestwords;
 
     for (auto word = begin(wordinfo_points); word != end(wordinfo_points); ++word) {
-        AddWord(baseword, *word, remaining_letters, bestwords, n_candidates, true);
-        AddWord(*word, baseword, remaining_letters, bestwords, n_candidates, true);
+        AddWord(baseword, *word, remaining_letters, bestwords, n_candidates, mintileefficiency, true);
+        AddWord(*word, baseword, remaining_letters, bestwords, n_candidates, mintileefficiency, true);
     }
     return bestwords;
 }
@@ -305,6 +309,8 @@ std::vector<std::string> ScoreAllWords(struct_word &s) {
 
     s.lengthefficiency = (float) score / (float) s.word.length();
     s.tileefficiency = (float) score / (float) tilecost;
+
+    std::cout<<s.word<<" "<<score<<" "<<tilecost<<std::endl;
     s.score = score;
 
     return words;

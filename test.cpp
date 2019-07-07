@@ -1,4 +1,5 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define MINTILEEFFICIENCY 6
 #include "catch.h"
 #include "scrabble.h"
 
@@ -135,20 +136,20 @@ TEST_CASE( "Best addition after", "[BestAddition]" ) {
     dict = Trie::CreateFromFile(dictionary_path);
 
     ScoreDictionary(dictionary_path);
-
+    std::string w = "antiferromagnetismspsychopathologically";
     std::array<int, 26> l = {};
-    CountLetters("hello", l);
+    CountLetters(w, l);
     struct_word baseword =  {
-        "hello",
-        8,
+        w,
+        ScoreWord(w),
         l
     };
 
     auto r= SubtractLetters(gamecounts, l);
-    auto a = BestAddition(baseword, r,5);
+    auto a = BestAddition(baseword, r,5, 0.0);
 
     std::sort(a.begin(), a.end(), CompareByWordScore);
-
-    REQUIRE(a[a.size()-1].word=="elloabcdefghijklmnohello");
+    std::cout<<a.size()<<std::endl;
+    REQUIRE(a[a.size()-1].word=="antiferromagnetismspsychopathologicallyprequalifications");
 }
 

@@ -1,4 +1,4 @@
-
+#define MINTILEEFFICIENCY 6
 #include <iostream>
 #include "trie.h"
 #include <fstream>
@@ -8,10 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include "robin_hood.h"
 #include <set>
 #include <queue>
 #include "scrabble.h"
+
 
 std::array<int, 26> gamecounts;
 Trie *dict;

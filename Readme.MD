@@ -1,6 +1,8 @@
 # Scrabbulizer
 Attempts to find high scoring scrabble words using up the entire tilebag for [The Riddler](https://fivethirtyeight.com/features/whats-your-best-scrabble-string/) due July 17th 2019.
 
+Super dirty C++ so use at your own risk etc.
+
 ## Strategy
 The strategy is:
 - Score all the words, as well as their subwords
@@ -32,4 +34,28 @@ subwords would be N^2 in aggregated word length. Using a trie takes this down to
 average sub-word length (M). I stole my Trie implementation from (Dan Vanderkam)[https://github.com/danvk/performance-boggle].
 
 ## Usage:
-This is trivially parallelized with OpenMP, there is a CMake file but this is ismple enojugh
+This is trivially parallelized with OpenMP, there is a CMake file but this is simple enough
+
+### Unit tests
+This will just run the unit tests I wrote. Some of these are comented out because there are conflicts with global
+variables that I am too lazy to fix.
+```bash
+g++ -std=gnu++11 -o tests test.cpp scrabble.cpp trie.cpp
+./tests
+```
+
+### Running
+This expects the dictionary to be at "/enable1.txt", do that. This also requires openmp and a compiler that supports C++11
+```bash
+g++ -fopenmp -Ofast -march=native -std=gnu++11 -o scrabbulizer main.cpp scrabble.cpp trie.cpp
+./scrabbulizer
+```
+This will priunt the best word it has found so far (approximately) as well as statsu about that word. If you cat this
+into a file you can see the _actual_ top word with
+
+```bash
+watch ./topout.sh
+```
+Feel free to play around with numlevel and mintileefficiency that are hardcoded into GetTopAdditions. These contro the minimum
+cutoff for tile efficiency and will determine how quickly you get to good words vs the eventual "best" word the algorithm finds.
+

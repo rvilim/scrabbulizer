@@ -18,11 +18,6 @@ std::vector<struct_word> GetTopAdditions(struct_word word, std::array<int, 26> r
     {
 #pragma omp for nowait //fill vec_private in parallel
         for (int i = 0; i < bestwords.size(); i++) {
-            if (num==2){
-                std::cout<<word.word<<" "<<bestwords[0].word<<std::endl;
-                std::cout<<word.word<<" "<<bestwords[1].word<<std::endl;
-                std::cout<<word.word<<" "<<bestwords[2].word<<std::endl;
-            }
             auto l = SubtractLetters(gamecounts, bestwords[i].letters);
             auto a = GetTopAdditions(bestwords[i], l, num + 1);
 
@@ -236,12 +231,6 @@ bool CanAddWord(std::array<int, 26> remaining_letters, std::array<int, 26> word_
     return true;
 }
 
-void PrintArray(std::array<int, 26> &a) {
-    for (int i = 0; i < 26; i++) {
-        std::cout << a[i] << " ";
-    }
-}
-
 void CountLetters(std::string s, std::array<int, 26> &count) {
     for (char &c : s) {
         count[(int) c - (int) 'a'] += 1;
@@ -310,7 +299,6 @@ std::vector<std::string> ScoreAllWords(struct_word &s) {
     s.lengthefficiency = (float) score / (float) s.word.length();
     s.tileefficiency = (float) score / (float) tilecost;
 
-    std::cout<<s.word<<" "<<score<<" "<<tilecost<<std::endl;
     s.score = score;
 
     return words;

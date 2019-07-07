@@ -40,8 +40,8 @@ This is trivially parallelized with OpenMP, there is a CMake file but this is si
 This will just run the unit tests I wrote. Some of these are comented out because there are conflicts with global
 variables that I am too lazy to fix.
 ```bash
-g++ -std=gnu++11 -o tests test.cpp scrabble.cpp trie.cpp
-./tests
+> g++ -std=gnu++11 -o tests test.cpp scrabble.cpp trie.cpp
+> ./tests
 ```
 
 ### Running

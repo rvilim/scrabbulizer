@@ -30,8 +30,8 @@ in some short sightednes on the programs part. To mitigate this we do a few thin
 The root of this is the Trie, which stores the whole dictionary in a tree structure. This lets us quickly search for
 words in the dictionary, but also find words that begin with certain letters. This is crucial for the scoring function
 which is where this program spends the most time. If we stored our dictionary in a hash table, scoring all the words +
-subwords would be N^2 in aggregated word length. Using a (trie)[https://en.wikipedia.org/wiki/Trie] takes this down to N Log(M) in aggregate word length (N) and
-average sub-word length (M). I stole my Trie implementation from (Dan Vanderkam)[https://github.com/danvk/performance-boggle].
+subwords would be N^2 in aggregated word length. Using a [trie](https://en.wikipedia.org/wiki/Trie) takes this down to N Log(M) in aggregate word length (N) and
+average sub-word length (M). I stole my Trie implementation from [Dan Vanderkam](https://github.com/danvk/performance-boggle).
 
 ## Usage:
 This is trivially parallelized with OpenMP, there is a CMake file but this is simple enough

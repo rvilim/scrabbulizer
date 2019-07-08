@@ -13,7 +13,7 @@ The strategy is:
     - Can we take advantage of any overlap between them? For example "hello" and "look" can be concatenated to "hellook"
 - When scoring words we find the optimal place to put the blanks, if we need to have a blank on an "h" it's better to
   put it on the "h" with the fewest usages. Note there is currently a bug in this with de-duplication which might result
-  in slightly non-optimal blank placement ¯\_(ツ)_/¯.
+  in slightly non-optimal blank placement ¯\\_(ツ)_/¯.
 
 This is inherently a greedy, recursive method. We pick the highest scoring words, then concatenate onto those the
 words that will result in the highest combined word and keep doing this until we run out of letters. This could result
